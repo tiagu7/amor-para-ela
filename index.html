@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<title>Desafio</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html,
+body{
+    width:100%;
+    min-height:100%;
+    background:#000;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+    overflow:hidden;
+}
+
+button{
+    font:inherit;
+}
+
+/* =========================
+   TELA INICIAL
+========================= */
+
+.screen,
+.quiz,
+.final-screen{
+    position:fixed;
+    inset:0;
+}
+
+.screen{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:24px;
+
+    background:
+        radial-gradient(
+            circle at 50% 30%,
+            #181818 0%,
+            #080808 45%,
+            #000 100%
+        );
+
+    opacity:1;
+    visibility:visible;
+
+    transform:translate3d(0,0,0);
+
+    transition:
+        opacity .45s ease,
+        transform .45s ease;
+
+    z-index:5;
+
+    will-change:opacity,transform;
+}
+
+.screen.hidden{
+    opacity:0;
+    visibility:hidden;
+
+    transform:translate3d(0,-30px,0);
+
+    pointer-events:none;
+}
+
+.content{
+    width:min(100%,620px);
+    text-align:center;
+}
+
+/* BOTÃO INICIAL */
+
+.start-button{
+    position:relative;
+
+    width:min(90vw,390px);
+    min-height:105px;
+
+    border:1px solid #444;
+    border-radius:18px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #222 0%,
+            #050505 45%,
+            #111 100%
+        );
+
+    color:#fff;
+
+    font-size:clamp(20px,5vw,28px);
+    font-weight:800;
+
+    letter-spacing:-.5px;
+
+    cursor:pointer;
+
+    box-shadow:
+        0 20px 45px rgba(0,0,0,.8),
+        inset 0 1px 1px rgba(255,255,255,.18),
+        inset 0 -8px 18px rgba(0,0,0,.8);
+
+    overflow:hidden;
+
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease;
+}
+
+.start-button::before{
+    content:"";
+
+    position:absolute;
+
+    top:0;
+    left:-120%;
+
+    width:70%;
+    height:100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,.15),
+            transparent
+        );
+
+    transform:skewX(-20deg);
+
+    animation:shine 3.5s infinite;
+}
+
+.start-button:active{
+    transform:scale(.97);
+}
+
+.warning{
+    margin:30px auto 0;
+
+    max-width:580px;
+
+    color:#fff;
+
+    font-size:clamp(15px,3.8vw,19px);
+
+    line-height:1.55;
+
+    font-weight:700;
+}
+
+@keyframes shine{
+
+    0%{
+        left:-120%;
+    }
+
+    35%,
+    100%{
+        left:150%;
+    }
+
+}
+
+/* =========================
+   TRANSIÇÃO
+========================= */
+
+.transition{
+    position:fixed;
+
+    inset:0;
+
+    background:#000;
+
+    z-index:100;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    opacity:0;
+    visibility:hidden;
+
+    pointer-events:none;
+
+    overflow:hidden;
+
+    will-change:opacity;
+}
+
+.transition.active{
+    opacity:1;
+    visibility:visible;
+}
+
+.skull{
+    position:absolute;
+
+    color:#fff;
+
+    font-size:clamp(30px,8vw,70px);
+
+    opacity:0;
+
+    animation:
+        skullFloat 1.35s ease forwards;
+
+    will-change:
+        transform,
+        opacity;
+}
+
+@keyframes skullFloat{
+
+    0%{
+        opacity:0;
+
+        transform:
+            translate3d(0,100px,0)
+            scale(.4)
+            rotate(-20deg);
+    }
+
+    20%{
+        opacity:1;
+    }
+
+    70%{
+        opacity:1;
+
+        transform:
+            translate3d(0,-50px,0)
+            scale(1.1)
+            rotate(15deg);
+    }
+
+    100%{
+        opacity:0;
+
+        transform:
+            translate3d(0,-180px,0)
+            scale(.5)
+            rotate(-20deg);
+    }
+
+}
+
+/* =========================
+   QUIZ
+========================= */
+
+.quiz{
+    overflow-y:auto;
+
+    -webkit-overflow-scrolling:touch;
+
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            #202020 0%,
+            #090909 38%,
+            #000 100%
+        );
+
+    padding:
+        24px
+        18px
+        50px;
+
+    opacity:0;
+    visibility:hidden;
+
+    transform:
+        translate3d(0,30px,0);
+
+    transition:
+        opacity .45s ease,
+        transform .45s ease;
+
+    will-change:
+        opacity,
+        transform;
+}
+
+.quiz.active{
+    opacity:1;
+
+    visibility:visible;
+
+    transform:
+        translate3d(0,0,0);
+}
+
+.quiz-inner{
+    width:min(100%,760px);
+
+    margin:0 auto;
+}
+
+/* TOPO */
+
+.top{
+    display:flex;
+
+    justify-content:space-between;
+    align-items:center;
+
+    margin-bottom:35px;
+
+    padding:
+        14px
+        18px;
+
+    border:
+        1px solid #292929;
+
+    border-radius:15px;
+
+    background:
+        rgba(255,255,255,.025);
+}
+
+.progress{
+    font-size:14px;
+
+    color:#aaa;
+
+    font-weight:700;
+}
+
+.score{
+    font-size:16px;
+
+    font-weight:900;
+}
+
+/* CAIXA DA QUESTÃO */
+
+.question-box{
+    padding:
+        25px
+        20px;
+
+    border:
+        1px solid #292929;
+
+    border-radius:20px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.06),
+            rgba(255,255,255,.015)
+        );
+
+    box-shadow:
+        0 25px 70px rgba(0,0,0,.6),
+        inset 0 1px rgba(255,255,255,.05);
+}
+
+.question{
+    white-space:pre-line;
+
+    font-size:
+        clamp(
+            17px,
+            4.3vw,
+            21px
+        );
+
+    line-height:1.65;
+
+    font-weight:700;
+}
+
+/* ALTERNATIVAS */
+
+.answers{
+    display:grid;
+
+    gap:13px;
+
+    margin-top:25px;
+}
+
+.answer{
+    width:100%;
+
+    min-height:62px;
+
+    padding:
+        14px
+        17px;
+
+    text-align:left;
+
+    border:
+        1px solid #333;
+
+    border-radius:13px;
+
+    background:#050505;
+
+    color:#fff;
+
+    font-size:16px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:
+        transform .15s ease,
+        background .15s ease,
+        border-color .15s ease;
+}
+
+.answer:active{
+    transform:scale(.98);
+}
+
+.answer.correct{
+    background:#fff;
+
+    color:#000;
+
+    border-color:#fff;
+}
+
+.answer.wrong{
+    background:#c90000;
+
+    color:#fff;
+
+    border-color:#ff3b3b;
+
+    animation:
+        shake .35s ease;
+}
+
+.answer.locked{
+    pointer-events:none;
+
+    cursor:default;
+}
+
+@keyframes shake{
+
+    0%,
+    100%{
+        transform:translateX(0);
+    }
+
+    25%{
+        transform:translateX(-8px);
+    }
+
+    50%{
+        transform:translateX(8px);
+    }
+
+    75%{
+        transform:translateX(-4px);
+    }
+
+}
+
+/* =========================
+   RESULTADO
+========================= */
+
+.result-overlay{
+    position:fixed;
+
+    inset:0;
+
+    z-index:80;
+
+    background:
+        rgba(0,0,0,.97);
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:24px;
+
+    opacity:0;
+
+    visibility:hidden;
+
+    pointer-events:none;
+
+    transition:
+        opacity .3s ease;
+}
+
+.result-overlay.show{
+    opacity:1;
+
+    visibility:visible;
+
+    pointer-events:auto;
+}
+
+.result-box{
+    width:min(100%,600px);
+
+    text-align:center;
+
+    padding:
+        35px
+        22px;
+
+    border:
+        1px solid #333;
+
+    border-radius:22px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #171717,
+            #050505
+        );
+
+    box-shadow:
+        0 30px 90px rgba(0,0,0,.9);
+
+    transform:
+        scale(.94);
+
+    transition:
+        transform .3s ease;
+}
+
+.result-overlay.show .result-box{
+    transform:
+        scale(1);
+}
+
+.result-title{
+    white-space:pre-line;
+
+    font-size:
+        clamp(
+            25px,
+            7vw,
+            42px
+        );
+
+    line-height:1.25;
+
+    font-weight:1000;
+
+    margin-bottom:25px;
+}
+
+.result-correct{
+    color:#fff;
+}
+
+.result-wrong{
+    color:#ff3030;
+}
+
+.next-button{
+    margin-top:28px;
+
+    width:min(100%,300px);
+
+    min-height:60px;
+
+    border:
+        1px solid #444;
+
+    border-radius:13px;
+
+    background:#000;
+
+    color:#fff;
+
+    font-size:17px;
+
+    font-weight:900;
+
+    cursor:pointer;
+
+    transition:
+        background .15s ease,
+        color .15s ease,
+        transform .15s ease;
+}
+
+.next-button:active{
+    transform:scale(.96);
+}
+
+/* =========================
+   FINAL
+========================= */
+
+.final-screen{
+    z-index:120;
+
+    background:
+        radial-gradient(
+            circle at 50% 35%,
+            #202020,
+            #050505 55%,
+            #000
+        );
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:25px;
+
+    text-align:center;
+
+    opacity:0;
+
+    visibility:hidden;
+
+    pointer-events:none;
+
+    transition:
+        opacity .5s ease;
+}
+
+.final-screen.show{
+    opacity:1;
+
+    visibility:visible;
+
+    pointer-events:auto;
+}
+
+.final-content{
+    width:min(100%,700px);
+}
+
+.final-score{
+    font-size:18px;
+
+    color:#aaa;
+
+    margin-bottom:35px;
+
+    font-weight:800;
+}
+
+.final-title{
+    font-size:
+        clamp(
+            27px,
+            7vw,
+            48px
+        );
+
+    line-height:1.25;
+
+    font-weight:1000;
+
+    margin-bottom:30px;
+}
+
+.final-message{
+    font-size:
+        clamp(
+            19px,
+            5vw,
+            28px
+        );
+
+    line-height:1.5;
+
+    font-weight:900;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:500px){
+
+    .screen{
+        padding:18px;
+    }
+
+    .warning{
+        margin-top:25px;
+    }
+
+    .quiz{
+        padding:
+            15px
+            12px
+            35px;
+    }
+
+    .top{
+        margin-bottom:20px;
+    }
+
+    .question-box{
+        padding:
+            20px
+            15px;
+    }
+
+    .question{
+        font-size:16px;
+    }
+
+    .answer{
+        min-height:58px;
+
+        font-size:15px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- =========================
+     TELA INICIAL
+========================= -->
+
+<section
+    class="screen"
+    id="startScreen"
+>
+
+    <div class="content">
+
+        <button
+            class="start-button"
+            id="startButton"
+        >
+            Comece seu desafio sua gulosa
+        </button>
+
+        <p class="warning">
+            Não vale colar, não vale pesquisar e nem usar IA SUA POPOZUDONA GOSTOSA DELÍCIA SENÃO EU TE ESTUDO
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     TRANSIÇÃO
+========================= -->
+
+<div
+    class="transition"
+    id="transition"
+></div>
+
+
+<!-- =========================
+     QUIZ
+========================= -->
+
+<section
+    class="quiz"
+    id="quizScreen"
+>
+
+    <div class="quiz-inner">
+
+        <div class="top">
+
+            <div
+                class="progress"
+                id="progress"
+            >
+                Questão 1 de 9
+            </div>
+
+            <div
+                class="score"
+                id="score"
+            >
+                Nota: 0
+            </div>
+
+        </div>
+
+        <div class="question-box">
+
+            <div
+                class="question"
+                id="question"
+            ></div>
+
+            <div
+                class="answers"
+                id="answers"
+            ></div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     RESULTADO
+========================= -->
+
+<div
+    class="result-overlay"
+    id="resultOverlay"
+>
+
+    <div class="result-box">
+
+        <div
+            class="result-title"
+            id="resultTitle"
+        ></div>
+
+        <button
+            class="next-button"
+            id="nextButton"
+        >
+            Agr continue hehehehe
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     FINAL
+========================= -->
+
+<div
+    class="final-screen"
+    id="finalScreen"
+>
+
+    <div class="final-content">
+
+        <div
+            class="final-score"
+            id="finalScore"
+        ></div>
+
+        <div class="final-title">
+            AGORA TOTOSONA ME MANDE A FOTO DAS SUAS RESPOSTAS
+        </div>
+
+        <div
+            class="final-message"
+            id="finalMessage"
+        ></div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+"use strict";
+
+
+/* =========================
+   QUESTÕES
+========================= */
+
+const questions = [
+
+    {
+        question:`Noix tem um número de 3 algarismos distintos.
+
+A soma dos três algarismos é 18.
+
+O algarismo das centenas é 3 vezes o algarismo das unidades.
+
+O algarismo das dezenas é 2 unidades maior que o algarismo das unidades.
+
+Além disso, o número é divisível por 9.
+
+Qual é o número?
+
+A) 478
+B) 963
+C) 8975
+D) 684`,
+
+        options:[
+            "A) 478",
+            "B) 963",
+            "C) 8975",
+            "D) 684"
+        ],
+
+        correct:1
+    },
+
+
+    {
+        question:`Vc sabe que os planetas possuem diferentes períodos orbitais.
+
+Agora presta atenção:
+
+Qual alternativa apresenta uma afirmação em que TODAS as informações estão corretas?
+
+A) Vênus é o planeta mais próximo do Sol, possui o menor ano do Sistema Solar e não possui luas.
+
+B) Mercúrio é o planeta mais próximo do Sol, possui o menor ano do Sistema Solar e não possui luas.
+
+C) Marte possui duas luas, seu período orbital é maior que o da Terra e ele é o segundo planeta mais próximo do Sol.
+
+D) Júpiter é o planeta que completa uma volta mais rapidamente ao redor do Sol, possui dezenas de luas e é o planeta mais próximo da Terra.`,
+
+        options:[
+            "A) Vênus é o planeta mais próximo do Sol, possui o menor ano do Sistema Solar e não possui luas.",
+            "B) Mercúrio é o planeta mais próximo do Sol, possui o menor ano do Sistema Solar e não possui luas.",
+            "C) Marte possui duas luas, seu período orbital é maior que o da Terra e ele é o segundo planeta mais próximo do Sol.",
+            "D) Júpiter é o planeta que completa uma volta mais rapidamente ao redor do Sol, possui dezenas de luas e é o planeta mais próximo da Terra."
+        ],
+
+        correct:1
+    },
+
+
+    {
+        question:`Noix tem 10 pessoas numa sala.
+
+Cada pessoa deveria apertar a mão de todas as outras exatamente uma vez.
+
+Porém:
+
+- 2 pessoas se recusam a apertar qualquer mão;
+- outras 2 pessoas apertam a mão de todo mundo, exceto uma da outra;
+- todas as outras pessoas seguem a regra normalmente.
+
+Quantos apertos de mão acontecem no total?
+
+A) 32
+B) 27
+C) 28
+D) 30`,
+
+        options:[
+            "A) 32",
+            "B) 27",
+            "C) 28",
+            "D) 30"
+        ],
+
+        correct:1
+    },
+
+
+    {
+        question:`Observe:
+
+2 — 5 — 10 — 17 — 26 — 37 — 50 — ?
+
+Qual número vem depois?
+
+Mas atenção: não basta olhar somente para a diferença entre os números. Existe uma relação matemática entre a posição do número na sequência e o próprio número.
+
+A) 63
+B) 72
+C) 65
+D) 61`,
+
+        options:[
+            "A) 63",
+            "B) 72",
+            "C) 65",
+            "D) 61"
+        ],
+
+        correct:2
+    },
+
+
+    {
+        question:`O Brasil possui fronteira terrestre com 10 países/territórios sul-americanos.
+
+Agora vem a pegadinha:
+
+Qual alternativa contém APENAS países que fazem fronteira terrestre com o Brasil?
+
+A) Argentina, Bolívia, Chile e Peru
+B) Colômbia, Venezuela, Guiana e Suriname
+C) Paraguai, Uruguai, Equador e Peru
+D) Bolívia, Chile, Paraguai e Equador
+
+Essa aqui parece fácil até vc perceber que uma palavrinha muda tudo.`,
+
+        options:[
+            "A) Argentina, Bolívia, Chile e Peru",
+            "B) Colômbia, Venezuela, Guiana e Suriname",
+            "C) Paraguai, Uruguai, Equador e Peru",
+            "D) Bolívia, Chile, Paraguai e Equador"
+        ],
+
+        correct:1
+    },
+
+
+    {
+        question:`Vc encontra uma máquina do tempo quebrada.
+
+Ela só consegue voltar exatamente 10 minutos no passado.
+
+Se vc apertar o botão agora, encontrará uma versão sua de 10 minutos atrás.
+
+Qual dessas situações cria um paradoxo lógico?
+
+A) Vc conversa com seu eu do passado e conta o que aconteceu nos últimos 10 minutos.
+
+B) Vc volta 10 minutos, impede seu eu do passado de apertar o botão e mesmo assim consegue voltar no tempo.
+
+C) Vc volta 10 minutos e simplesmente observa seu eu do passado.
+
+D) Vc volta 10 minutos e deixa um objeto no local onde seu eu do passado irá encontrá-lo.`,
+
+        options:[
+            "A) Vc conversa com seu eu do passado e conta o que aconteceu nos últimos 10 minutos.",
+            "B) Vc volta 10 minutos, impede seu eu do passado de apertar o botão e mesmo assim consegue voltar no tempo.",
+            "C) Vc volta 10 minutos e simplesmente observa seu eu do passado.",
+            "D) Vc volta 10 minutos e deixa um objeto no local onde seu eu do passado irá encontrá-lo."
+        ],
+
+        correct:1
+    },
+
+
+    {
+        question:`Um homem entra em um elevador completamente vazio.
+
+Ele aperta o botão do 10º andar.
+
+O elevador sobe normalmente.
+
+Quando chega ao 10º andar, ele sai, olha para o elevador e começa a rir.
+
+Não aconteceu nenhuma falha, ninguém entrou no elevador e nada mudou durante a viagem.
+
+Qual é a explicação mais lógica?
+
+A) Ele percebeu que estava no prédio errado.
+
+B) Ele estava testando se o elevador funcionava.
+
+C) Ele lembrou de uma piada sobre elevadores.
+
+D) Ele apertou o botão errado e só percebeu ao chegar.`,
+
+        options:[
+            "A) Ele percebeu que estava no prédio errado.",
+            "B) Ele estava testando se o elevador funcionava.",
+            "C) Ele lembrou de uma piada sobre elevadores.",
+            "D) Ele apertou o botão errado e só percebeu ao chegar."
+        ],
+
+        correct:0
+    },
+
+
+    {
+        question:`Um avião está voando exatamente sobre a fronteira entre dois países.
+
+Ele sofre uma pane e precisa fazer um pouso de emergência.
+
+O piloto consegue pousar com segurança, mas o avião fica exatamente dividido pela linha da fronteira.
+
+Em qual país os passageiros que sobreviveram devem ser enterrados?
+
+A) No país da esquerda.
+
+B) No país da direita.
+
+C) Nos dois países.
+
+D) Em nenhum dos dois.`,
+
+        options:[
+            "A) No país da esquerda.",
+            "B) No país da direita.",
+            "C) Nos dois países.",
+            "D) Em nenhum dos dois."
+        ],
+
+        correct:3,
+
+        special:true
+    },
+
+
+    {
+        question:`Um médico diz para um paciente:
+
+"Tenho uma notícia boa e uma notícia ruim."
+
+O paciente responde:
+
+"Primeiro a ruim."
+
+O médico diz:
+
+"Vc tem apenas 24 horas de vida."
+
+O paciente fica desesperado e pergunta:
+
+"E qual é a notícia boa?"
+
+O médico responde:
+
+"Estou tentando te contar isso desde ontem."
+
+Qual é a explicação?
+
+A) A notícia boa é que o paciente não morrerá.
+
+B) O médico estava atrasado.
+
+C) A notícia boa é que o paciente já perdeu parte das 24 horas.
+
+D) O médico confundiu o paciente com outra pessoa.`,
+
+        options:[
+            "A) A notícia boa é que o paciente não morrerá.",
+            "B) O médico estava atrasado.",
+            "C) A notícia boa é que o paciente já perdeu parte das 24 horas.",
+            "D) O médico confundiu o paciente com outra pessoa."
+        ],
+
+        correct:2
+    }
+
+];
+
+
+/* =========================
+   ESTADO
+========================= */
+
+let currentQuestion = 0;
+
+let score = 0;
+
+let answered = false;
+
+
+/* =========================
+   ELEMENTOS
+========================= */
+
+const startScreen =
+    document.getElementById("startScreen");
+
+const startButton =
+    document.getElementById("startButton");
+
+const transition =
+    document.getElementById("transition");
+
+const quizScreen =
+    document.getElementById("quizScreen");
+
+const questionElement =
+    document.getElementById("question");
+
+const answersElement =
+    document.getElementById("answers");
+
+const progressElement =
+    document.getElementById("progress");
+
+const scoreElement =
+    document.getElementById("score");
+
+const resultOverlay =
+    document.getElementById("resultOverlay");
+
+const resultTitle =
+    document.getElementById("resultTitle");
+
+const nextButton =
+    document.getElementById("nextButton");
+
+const finalScreen =
+    document.getElementById("finalScreen");
+
+const finalScore =
+    document.getElementById("finalScore");
+
+const finalMessage =
+    document.getElementById("finalMessage");
+
+
+/* =========================
+   CAVEIRAS
+========================= */
+
+function createSkulls(){
+
+    transition.replaceChildren();
+
+    const fragment =
+        document.createDocumentFragment();
+
+    for(let i=0;i<12;i++){
+
+        const skull =
+            document.createElement("div");
+
+        skull.className =
+            "skull";
+
+        skull.textContent =
+            "☠";
+
+        skull.style.left =
+            (Math.random()*100)+"%";
+
+        skull.style.top =
+            (45+Math.random()*45)+"%";
+
+        skull.style.animationDelay =
+            (i*.07)+"s";
+
+        fragment.appendChild(skull);
+    }
+
+    transition.appendChild(fragment);
+}
+
+
+/* =========================
+   COMEÇAR
+========================= */
+
+function startChallenge(){
+
+    startScreen.classList.add("hidden");
+
+    createSkulls();
+
+    requestAnimationFrame(()=>{
+
+        transition.classList.add("active");
+
+    });
+
+    setTimeout(()=>{
+
+        quizScreen.classList.add("active");
+
+        loadQuestion();
+
+    },900);
+
+    setTimeout(()=>{
+
+        transition.classList.remove("active");
+
+    },1350);
+}
+
+
+/* =========================
+   CARREGAR QUESTÃO
+========================= */
+
+function loadQuestion(){
+
+    answered=false;
+
+    const data =
+        questions[currentQuestion];
+
+    progressElement.textContent =
+        `Questão ${currentQuestion+1} de ${questions.length}`;
+
+    scoreElement.textContent =
+        `Nota: ${score}`;
+
+    questionElement.textContent =
+        data.question;
+
+
+    const fragment =
+        document.createDocumentFragment();
+
+
+    data.options.forEach(
+        (option,index)=>{
+
+            const button =
+                document.createElement("button");
+
+            button.className =
+                "answer";
+
+            button.textContent =
+                option;
+
+
+            button.addEventListener(
+                "click",
+                ()=>{
+                    answerQuestion(
+                        index,
+                        button
+                    );
+                },
+                {
+                    once:true
+                }
+            );
+
+
+            fragment.appendChild(button);
+
+        }
+    );
+
+
+    answersElement.replaceChildren(
+        fragment
+    );
+
+
+    quizScreen.scrollTop=0;
+}
+
+
+/* =========================
+   RESPONDER
+========================= */
+
+function answerQuestion(
+    selected,
+    selectedButton
+){
+
+    if(answered)return;
+
+    answered=true;
+
+
+    const data =
+        questions[currentQuestion];
+
+    const buttons =
+        answersElement.children;
+
+
+    for(
+        const button
+        of buttons
+    ){
+
+        button.classList.add(
+            "locked"
+        );
+
+    }
+
+
+    /* ACERTOU */
+
+    if(
+        selected ===
+        data.correct
+    ){
+
+        score++;
+
+
+        selectedButton.classList.add(
+            "correct"
+        );
+
+
+        if(data.special){
+
+            resultTitle.textContent =
+                "ISSSO MT BEMMMMM ASSIM Q SE FAZ GULOSA";
+
+        }else{
+
+            resultTitle.textContent =
+                "ACERTOU GULAAAAAA\nMAS AINDA SIM NÃO ESCAPA DO ESTUDO";
+
+        }
+
+
+        resultTitle.className =
+            "result-title result-correct";
+
+    }
+
+
+    /* ERROU */
+
+    else{
+
+        selectedButton.classList.add(
+            "wrong"
+        );
+
+
+        buttons[
+            data.correct
+        ].classList.add(
+            "correct"
+        );
+
+
+        resultTitle.textContent =
+            "VC ERROUUU GULOSA VAI SER ESTUDADA 🤚🏻🍑🍑🍑🤚🏻🤚🏻🤚🏻hehehee";
+
+
+        resultTitle.className =
+            "result-title result-wrong";
+
+    }
+
+
+    scoreElement.textContent =
+        `Nota: ${score}`;
+
+
+    setTimeout(()=>{
+
+        resultOverlay.classList.add(
+            "show"
+        );
+
+    },280);
+
+}
+
+
+/* =========================
+   PRÓXIMA
+========================= */
+
+function nextQuestion(){
+
+    resultOverlay.classList.remove(
+        "show"
+    );
+
+
+    currentQuestion++;
+
+
+    if(
+        currentQuestion >=
+        questions.length
+    ){
+
+        setTimeout(
+            finishChallenge,
+            280
+        );
+
+        return;
+    }
+
+
+    quizScreen.classList.remove(
+        "active"
+    );
+
+
+    setTimeout(()=>{
+
+        createSkulls();
+
+        transition.classList.add(
+            "active"
+        );
+
+
+        setTimeout(()=>{
+
+            loadQuestion();
+
+            quizScreen.classList.add(
+                "active"
+            );
+
+        },500);
+
+
+        setTimeout(()=>{
+
+            transition.classList.remove(
+                "active"
+            );
+
+        },850);
+
+
+    },180);
+
+}
+
+
+/* =========================
+   FINAL
+========================= */
+
+function finishChallenge(){
+
+    quizScreen.classList.remove(
+        "active"
+    );
+
+
+    finalScore.textContent =
+        `Nota final: ${score} de ${questions.length}`;
+
+
+    if(score <= 4){
+
+        finalMessage.textContent =
+            "HMMMM NÃO conseguiu passar, vou estudar esse bundão 🤚🏻🍑🍑🍑🤚🏻🤚🏻🤚🏻 hehehe";
+
+    }
+
+    else{
+
+        finalMessage.textContent =
+            "OLHAAAAAA TIROU UMA BOA NOTA, MAS AINDA SIM SERÁ ESTUDADA 🤚🏻🍑🍑🍑🤚🏻🤚🏻🤚🏻 hehehe";
+
+    }
+
+
+    setTimeout(()=>{
+
+        finalScreen.classList.add(
+            "show"
+        );
+
+    },350);
+
+}
+
+
+/* =========================
+   EVENTOS
+========================= */
+
+startButton.addEventListener(
+    "click",
+    startChallenge
+);
+
+nextButton.addEventListener(
+    "click",
+    nextQuestion
+);
+
+</script>
+
+</body>
+</html>
